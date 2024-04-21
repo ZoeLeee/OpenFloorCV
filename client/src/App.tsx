@@ -4,6 +4,7 @@ import * as BABYLON from "@babylonjs/core";
 
 function App() {
   let canvasRef: HTMLCanvasElement | undefined;
+  let inputRef: HTMLInputElement | undefined;
 
   let engine: BABYLON.Engine | undefined;
 
@@ -36,10 +37,34 @@ function App() {
         shape: pts, //vec3 array with z = 0,
         depth: 20,
         updatable: true,
-        sideOrientation: BABYLON.Mesh.DOUBLESIDE
+        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
       });
-      extruded.position.y=20
+      extruded.position.y = 20;
     }
+  };
+
+  const handleChange = (evt) => {
+    const input = inputRef;
+    if (!input?.files?.[0]) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", input.files[0]);
+
+    fetch("http://127.0.0.1:5000/render", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data: ", data);
+        //
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        //
+      });
   };
 
   onMount(() => {
@@ -87,16 +112,16 @@ function App() {
   return (
     <div>
       <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
-      <button
-        onClick={click}
+      <div
         style={{
           position: "fixed",
           right: "40px",
           top: 0,
         }}
       >
-        调试
-      </button>
+        <button onClick={click}>调试</button>
+        <input type="file" ref={inputRef} onChange={handleChange} />
+      </div>
     </div>
   );
 }
